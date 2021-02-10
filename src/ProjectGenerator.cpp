@@ -1,8 +1,13 @@
 #include "ProjectGenerator.hpp"
-#include "CodeGenerator.hpp"
-#include "MakefileCreator.hpp"
+#include "CodeGenerator/CodeGenerator.hpp"
+#include "MakefileGenerator/MakefileGenerator.hpp"
+#include "Utilities/GitInit.hpp"
 #include <iostream>
 
+/**
+ * @brief In C++20, this is to prevent type deduction conflict
+ * @tparam T The known type to prevent from auto type deduction
+ */
 template<typename T>
 struct type_identity
 {
@@ -21,34 +26,53 @@ auto FindFunctionInMap(std::unordered_map<LanguageString, FactoryFunction>& map,
     return PtrType{ nullptr };
 }
 
-ProjectGeneratorFactory::ProjectGeneratorFactory(char const* projectName, char const* language)
+ProjectGenerator::ProjectGenerator(char const* projectName, char const* language)
 {
     dir = FindFunctionInMap(ProjectDirCreatorFactory(), language, projectName);
     code = FindFunctionInMap(CodeGeneratorFactory(), language, *dir);
-    makefile = FindFunctionInMap(MakefileCreatorFactory(), MakefileCreator::getMakefileType(), *dir, *code);  //TODO: add proper makefile argument
+    makefile = FindFunctionInMap(MakefileCreatorFactory(), MakefileGenerator::getMakefileType(), *dir, *code);
     if (dir)
         dir->create();
 }
 
-void ProjectGeneratorFactory::generateCode()
+void ProjectGenerator::generateCode()
 {
     if(code)
         code->generate();
 }
 
-void ProjectGeneratorFactory::generateMakefile()
+void ProjectGenerator::generateMakefile(char const* makefileType)
 {
-    if(makefile)
-        makefile->writeMakefile();
+    if(!makefileType)
+    {
+    }
+    else
+    {
+        if (makefile)
+            makefile->writeMakefile();
+    }
 }
 
-void ProjectGeneratorFactory::generateAll()
+void ProjectGenerator::generateAll()
 {
     generateCode();
     generateMakefile();
 }
 
-void ProjectGeneratorFactory::PrintHelp()
+void ProjectGenerator::gitInit()
+{
+    std::cout << "Init a git repo y/n? (default = n): ";
+    char c{};
+    std::cin >> c;
+    if(c=='y')
+    {
+        GitInitializer init{ *dir };
+        init.addIgnoreDir("bin");
+        init.addIgnoreDir("build");
+    }
+}
+
+void ProjectGenerator::PrintHelp()
 {
     std::cout <<
 R"(Usage:

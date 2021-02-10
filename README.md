@@ -4,4 +4,5 @@ An easy to extend project generator, providing support for initializing a typica
 ### What it offers
 * the creation of a simple C executable skeleton
 
-## Project Overview
+## Documentation
+[here](doc/html/index.html)

@@ -20,9 +20,10 @@ static void create_project(char const* project_name, char const* language)
 {
     std::cout << rang::fg::red << "Creating project: " << project_name << "...\n" << rang::fg::reset;
 
-    ProjectGeneratorFactory generator{ project_name, language == nullptr ? "c" : language };
+    ProjectGenerator generator{ project_name, language == nullptr ? "c" : language };
 
     generator.generateAll();
+    generator.gitInit();
 }
 
 
@@ -32,7 +33,7 @@ int main(int argc, char const *argv[]) try{
         create_project(argv[1], argc==3? argv[2] : nullptr);
     }
     else
-        ProjectGeneratorFactory::PrintHelp();
+        ProjectGenerator::PrintHelp();
 #else
     create_project("hello", "c");
 #endif
